@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neon Tic Tac Toe</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #111;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #0ff;
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+            text-shadow: 0 0 10px #0ff, 0 0 20px #0ff, 0 0 30px #0ff;
+            animation: flickerAnimation 3s infinite;
+        }
+
+        @keyframes flickerAnimation {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.8;
+            }
+        }
+
+        .game-container {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-gap: 10px;
+            margin: 0 auto;
+            max-width: 300px;
+            width: 100%;
+            background-color: rgba(255, 0, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.5);
+        }
+
+        .cell {
+            aspect-ratio: 1/1;
+            background-color: rgba(0, 0, 0, 0.6);
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 0, 255, 0.3);
+        }
+
+        .cell:hover {
+            background-color: rgba(0, 0, 0, 0.8);
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.7);
+        }
+
+        .cell.x {
+            color: #f0f;
+            text-shadow: 0 0 10px #f0f, 0 0 20px #f0f;
+        }
+
+        .cell.o {
+            color: #0ff;
+            text-shadow: 0 0 10px #0ff, 0 0 20px #0ff;
+        }
+
+        .status {
+            margin: 20px 0;
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: rgba(0, 0, 0, 0.6);
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.5);
+        }
+
+        .status.player-x {
+            border: 2px solid #f0f;
+            text-shadow: 0 0 5px #f0f;
+        }
+
+        .status.player-o {
+            border: 2px solid #0ff;
+            text-shadow: 0 0 5px #0ff;
+        }
+
+        .scoreboard {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px auto;
+            max-width: 350px;
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.5);
+        }
+
+        .score-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            width: 45%;
+        }
+
+        .score-item.player-x {
+            border-right: 2px solid rgba(255, 0, 255, 0.3);
+        }
+
+        .score-name {
+            font-size: 1rem;
+            margin-bottom: 5px;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .player-x .score-name {
+            color: #f0f;
+            text-shadow: 0 0 5px #f0f;
+        }
+
+        .player-o .score-name {
+            color: #0ff;
+            text-shadow: 0 0 5px #0ff;
+        }
+
+        .score-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        .player-x .score-value {
+            text-shadow: 0 0 10px #f0f;
+        }
+
+        .player-o .score-value {
+            text-shadow: 0 0 10px #0ff;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin: 10px 5px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .reset-btn {
+            background-color: #f0f;
+            color: white;
+            box-shadow: 0 0 10px #f0f;
+        }
+
+        .reset-btn:hover {
+            background-color: #d0d;
+            box-shadow: 0 0 15px #f0f;
+        }
+
+        .leave-btn {
+            background-color: #ff3860;
+            color: white;
+            box-shadow: 0 0 10px #ff3860;
+        }
+
+        .leave-btn:hover {
+            background-color: #e6113f;
+            box-shadow: 0 0 15px #ff3860;
+        }
+
+        .lobby-container {
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
+            animation: glowAnimation 5s infinite alternate;
+        }
+
+        @keyframes glowAnimation {
+            0% {
+                box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
+            }
+
+            50% {
+                box-shadow: 0 0 30px rgba(0, 255, 255, 0.6);
+            }
+
+            100% {
+                box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
+            }
+        }
+
+        .create-room-btn,
+        .join-room-btn {
+            padding: 15px 30px;
+            background-color: #0ff;
+            color: #111;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin: 10px 0;
+            width: 100%;
+            max-width: 300px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-transform: uppercase;
+            box-shadow: 0 0 10px #0ff;
+        }
+
+        .create-room-btn:hover,
+        .join-room-btn:hover {
+            background-color: #00e6e6;
+            box-shadow: 0 0 20px #0ff;
+            transform: scale(1.05);
+        }
+
+        .join-room-btn {
+            background-color: #f0f;
+            box-shadow: 0 0 10px #f0f;
+        }
+
+        .join-room-btn:hover {
+            background-color: #d0d;
+            box-shadow: 0 0 20px #f0f;
+        }
+
+        .room-form {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+            animation: fadeIn 0.5s;
+        }
+
+        .room-form input {
+            padding: 15px;
+            width: 100%;
+            max-width: 300px;
+            margin-bottom: 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 2px solid rgba(255, 0, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .room-form input:focus {
+            outline: none;
+            border-color: #f0f;
+            box-shadow: 0 0 10px rgba(255, 0, 255, 0.7);
+        }
+
+        .room-form input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .submit-btn,
+        .back-btn {
+            padding: 10px 20px;
+            background-color: #0ff;
+            color: #111;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-transform: uppercase;
+            box-shadow: 0 0 10px #0ff;
+        }
+
+        .submit-btn:hover {
+            background-color: #00e6e6;
+            box-shadow: 0 0 15px #0ff;
+        }
+
+        .back-btn {
+            background-color: #aaa;
+            box-shadow: 0 0 5px #aaa;
+        }
+
+        .back-btn:hover {
+            background-color: #888;
+            box-shadow: 0 0 10px #aaa;
+        }
+
+        .room-info {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.6);
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .room-id {
+            font-weight: bold;
+            font-size: 1.5rem;
+            color: #0ff;
+            text-shadow: 0 0 5px #0ff;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .waiting-message {
+            font-style: italic;
+            color: #ccc;
+            margin-top: 15px;
+            animation: pulseAnimation 2s infinite;
+        }
+
+        @keyframes pulseAnimation {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .copy-btn {
+            background-color: #f0f;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 8px 15px;
+            margin-left: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 0 10px #f0f;
+        }
+
+        .copy-btn:hover {
+            background-color: #d0d;
+            box-shadow: 0 0 15px #f0f;
+        }
+
+        .message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .success {
+            background-color: rgba(0, 255, 0, 0.2);
+            color: #0f0;
+            border: 2px solid #0f0;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        .error {
+            background-color: rgba(255, 0, 0, 0.2);
+            color: #f66;
+            border: 2px solid #f66;
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+        }
+
+        .result-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            animation: fadeIn 0.5s;
+        }
+
+        .result-content {
+            background-color: rgba(0, 0, 0, 0.9);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 500px;
+            width: 80%;
+            box-shadow: 0 0 30px rgba(255, 0, 255, 0.7);
+        }
+
+        .result-title {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .win-text {
+            color: #0f0;
+            text-shadow: 0 0 10px #0f0, 0 0 20px #0f0;
+        }
+
+        .lose-text {
+            color: #f66;
+            text-shadow: 0 0 10px #f66, 0 0 20px #f66;
+        }
+
+        .draw-text {
+            color: #ff0;
+            text-shadow: 0 0 10px #ff0, 0 0 20px #ff0;
+        }
+
+        .result-btn {
+            padding: 12px 30px;
+            background-color: #f0f;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 0 10px #f0f;
+        }
+
+        .result-btn:hover {
+            background-color: #d0d;
+            box-shadow: 0 0 20px #f0f;
+            transform: scale(1.05);
+        }
+
+        /* Media queries for better responsiveness */
+        @media (max-width: 400px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .board {
+                grid-gap: 5px;
+                padding: 10px;
+            }
+
+            .cell {
+                font-size: 2rem;
+            }
+
+            .scoreboard {
+                padding: 10px;
+            }
+
+            .score-item {
+                padding: 5px;
+            }
+
+            .score-name {
+                font-size: 0.9rem;
+            }
+
+            .score-value {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Neon Tic Tac Toe</h1>
+
+        <!-- Lobby Screen -->
+        <div class="lobby-container" id="lobby">
+            <button class="create-room-btn" id="createRoomBtn">Create New Game</button>
+            <button class="join-room-btn" id="joinRoomBtn">Join Game</button>
+
+            <!-- Create Room Form -->
+            <div class="room-form" id="createRoomForm">
+                <input type="text" id="playerName" placeholder="Your Name" required>
+                <div>
+                    <button class="submit-btn" id="createSubmit">Create</button>
+                    <button class="back-btn" id="createBack">Back</button>
+                </div>
+            </div>
+
+            <!-- Join Room Form -->
+            <div class="room-form" id="joinRoomForm">
+                <input type="text" id="joinPlayerName" placeholder="Your Name" required>
+                <input type="text" id="roomId" placeholder="Room ID" required>
+                <div>
+                    <button class="submit-btn" id="joinSubmit">Join</button>
+                    <button class="back-btn" id="joinBack">Back</button>
+                </div>
+            </div>
+
+            <!-- Room Info -->
+            <div class="room-info" id="roomInfo">
+                <div>Room ID: <span class="room-id" id="displayRoomId"></span>
+                    <button class="copy-btn" id="copyBtn">Copy</button>
+                </div>
+                <p class="waiting-message" id="waitingMessage">Waiting for another player to join...</p>
+            </div>
+
+            <div class="message" id="message"></div>
+        </div>
+
+        <!-- Game Screen -->
+        <div class="game-container" id="gameContainer">
+            <!-- Scoreboard -->
+            <div class="scoreboard">
+                <div class="score-item player-x">
+                    <div class="score-name" id="player1Name">Player X</div>
+                    <div class="score-value" id="player1Score">0</div>
+                </div>
+                <div class="score-item player-o">
+                    <div class="score-name" id="player2Name">Player O</div>
+                    <div class="score-value" id="player2Score">0</div>
+                </div>
+            </div>
+
+            <div class="status" id="status">Game starting...</div>
+
+            <div class="board" id="board">
+                <div class="cell" data-index="0"></div>
+                <div class="cell" data-index="1"></div>
+                <div class="cell" data-index="2"></div>
+                <div class="cell" data-index="3"></div>
+                <div class="cell" data-index="4"></div>
+                <div class="cell" data-index="5"></div>
+                <div class="cell" data-index="6"></div>
+                <div class="cell" data-index="7"></div>
+                <div class="cell" data-index="8"></div>
+            </div>
+
+            <div>
+                <button class="btn reset-btn" id="resetBtn">New Game</button>
+                <button class="btn leave-btn" id="leaveBtn">Leave Room</button>
+            </div>
+        </div>
+
+        <!-- Result Overlay -->
+        <div class="result-overlay" id="resultOverlay">
+            <div class="result-content">
+                <div class="result-title" id="resultTitle">You Win!</div>
+                <button class="result-btn" id="continueBtn">Continue</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Socket.IO CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // DOM Elements
+            const lobby = document.getElementById('lobby');
+            const gameContainer = document.getElementById('gameContainer');
+            const board = document.getElementById('board');
+            const cells = document.querySelectorAll('.cell');
+            const status = document.getElementById('status');
+            const resetBtn = document.getElementById('resetBtn');
+            const leaveBtn = document.getElementById('leaveBtn');
+            const createRoomBtn = document.getElementById('createRoomBtn');
+            const joinRoomBtn = document.getElementById('joinRoomBtn');
+            const createRoomForm = document.getElementById('createRoomForm');
+            const joinRoomForm = document.getElementById('joinRoomForm');
+            const createSubmit = document.getElementById('createSubmit');
+            const joinSubmit = document.getElementById('joinSubmit');
+            const createBack = document.getElementById('createBack');
+            const joinBack = document.getElementById('joinBack');
+            const playerName = document.getElementById('playerName');
+            const joinPlayerName = document.getElementById('joinPlayerName');
+            const roomId = document.getElementById('roomId');
+            const roomInfo = document.getElementById('roomInfo');
+            const displayRoomId = document.getElementById('displayRoomId');
+            const waitingMessage = document.getElementById('waitingMessage');
+            const copyBtn = document.getElementById('copyBtn');
+            const messageDiv = document.getElementById('message');
+            const player1Name = document.getElementById('player1Name');
+            const player2Name = document.getElementById('player2Name');
+            const player1Score = document.getElementById('player1Score');
+            const player2Score = document.getElementById('player2Score');
+            const resultOverlay = document.getElementById('resultOverlay');
+            const resultTitle = document.getElementById('resultTitle');
+            const continueBtn = document.getElementById('continueBtn');
+
+            // Game variables
+            let currentPlayer;
+            let gameActive;
+            let gameState;
+            let playerSymbol;
+            let currentRoom;
+            let playerTurn;
+            let myName = '';
+            let opponentName = '';
+            let scores = { X: 0, O: 0 };
+
+            // Generate a unique room ID
+            function generateRoomId() {
+                // Create a more reliable random ID with better uniqueness
+                const timestamp = new Date().getTime().toString(36);
+                const randomPart = Math.random().toString(36).substring(2, 6);
+                return (timestamp + randomPart).toUpperCase().substring(0, 6);
+            }
+
+            // Connect to Socket.io server
+            // Replace 'YOUR_SERVER_URL' with your actual server URL when deploying
+            const socket = io('http://localhost:3000', {
+                transports: ['websocket', 'polling']
+            });
+            // Initialize the game board
+            const initGame = () => {
+                gameState = ['', '', '', '', '', '', '', '', ''];
+                gameActive = true;
+                currentPlayer = 'X';
+                playerTurn = playerSymbol === 'X';
+
+                updateStatusMessage();
+
+                cells.forEach(cell => {
+                    cell.textContent = '';
+                    cell.classList.remove('x', 'o');
+                });
+
+                updateUI();
+            };
+
+            // Update status message with player names
+            const updateStatusMessage = () => {
+                status.className = 'status';
+                if (playerTurn) {
+                    status.textContent = `${myName}'s turn`;
+                    status.classList.add(playerSymbol.toLowerCase() === 'x' ? 'player-x' : 'player-o');
+                } else {
+                    status.textContent = `${opponentName}'s turn`;
+                    status.classList.add(playerSymbol.toLowerCase() === 'x' ? 'player-o' : 'player-x');
+                }
+            };
+
+            // Update the UI based on player turn
+            const updateUI = () => {
+                cells.forEach((cell, index) => {
+                    if (gameState[index] !== '') {
+                        cell.textContent = gameState[index];
+                        cell.classList.add(gameState[index].toLowerCase());
+                    }
+                });
+
+                // Enable/disable clicking based on whose turn it is
+                cells.forEach(cell => {
+                    if (playerTurn && gameActive) {
+                        cell.style.cursor = 'pointer';
+                    } else {
+                        cell.style.cursor = 'not-allowed';
+                    }
+                });
+            };
+
+            // Update the scoreboard
+            const updateScoreboard = () => {
+                player1Score.textContent = scores.X;
+                player2Score.textContent = scores.O;
+            };
+
+            // Handle cell click
+            const handleCellClick = (e) => {
+                const cell = e.target;
+                const index = parseInt(cell.getAttribute('data-index'));
+
+                // Check if it's player's turn and the cell is empty
+                if (!playerTurn || gameState[index] !== '' || !gameActive) {
+                    return;
+                }
+
+                // Make the move
+                gameState[index] = playerSymbol;
+                cell.textContent = playerSymbol;
+                cell.classList.add(playerSymbol.toLowerCase());
+
+                // Send the move to the server
+                socket.emit('makeMove', {
+                    index: index,
+                    room: currentRoom
+                });
+
+                // Update turn
+                playerTurn = false;
+                updateStatusMessage();
+                updateUI();
+            };
+
+            // Handle game result
+            const handleGameResult = (result) => {
+                gameActive = false;
+
+                if (result.winner) {
+                    // Update scores
+                    scores[result.winner]++;
+                    updateScoreboard();
+
+                    // Show result overlay
+                    if (result.winner === playerSymbol) {
+                        resultTitle.textContent = "You Win!";
+                        resultTitle.className = "result-title win-text";
+                    } else {
+                        resultTitle.textContent = "You Lose!";
+                        resultTitle.className = "result-title lose-text";
+                    }
+                } else {
+                    resultTitle.textContent = "It's a Draw!";
+                    resultTitle.className = "result-title draw-text";
+                }
+
+                resultOverlay.style.display = "flex";
+            };
+
+            // Event listeners for game cells
+            cells.forEach(cell => {
+                cell.addEventListener('click', handleCellClick);
+            });
+
+            // Reset button handler
+            resetBtn.addEventListener('click', () => {
+                socket.emit('requestNewGame', { room: currentRoom });
+            });
+
+            // Continue button handler
+            continueBtn.addEventListener('click', () => {
+                resultOverlay.style.display = "none";
+            });
+
+            // Leave room button handler
+            leaveBtn.addEventListener('click', () => {
+                socket.emit('leaveRoom', { room: currentRoom });
+                scores = { X: 0, O: 0 };
+                showLobby();
+            });
+
+            // Create room button handler
+            createRoomBtn.addEventListener('click', () => {
+                createRoomForm.style.display = 'flex';
+                joinRoomForm.style.display = 'none';
+            });
+
+            // Join room button handler
+            joinRoomBtn.addEventListener('click', () => {
+                joinRoomForm.style.display = 'flex';
+                createRoomForm.style.display = 'none';
+            });
+
+            // Back button handlers
+            createBack.addEventListener('click', () => {
+                createRoomForm.style.display = 'none';
+            });
+
+            joinBack.addEventListener('click', () => {
+                joinRoomForm.style.display = 'none';
+            });
+
+            // Create room submit handler
+            createSubmit.addEventListener('click', () => {
+                if (!playerName.value.trim()) {
+                    showMessage('Please enter your name', 'error');
+                    return;
+                }
+
+                myName = playerName.value.trim();
+                const newRoomId = generateRoomId();
+
+                socket.emit('createRoom', {
+                    name: myName,
+                    room: newRoomId
+                });
+
+                createRoomForm.style.display = 'none';
+                roomInfo.style.display = 'block';
+            });
+
+            // Join room submit handler
+            joinSubmit.addEventListener('click', () => {
+                if (!joinPlayerName.value.trim() || !roomId.value.trim()) {
+                    showMessage('Please fill in all fields', 'error');
+                    return;
+                }
+
+                myName = joinPlayerName.value.trim();
+
+                socket.emit('joinRoom', {
+                    name: myName,
+                    room: roomId.value.trim()
+                });
+            });
+
+            // Copy room ID button handler
+            copyBtn.addEventListener('click', () => {
+                navigator.clipboard.writeText(displayRoomId.textContent)
+                    .then(() => {
+                        showMessage('Room ID copied to clipboard!', 'success');
+                    })
+                    .catch(err => {
+                        console.error('Could not copy text: ', err);
+                    });
+            });
+
+            // Show message helper
+            const showMessage = (text, type) => {
+                messageDiv.textContent = text;
+                messageDiv.className = `message ${type}`;
+                messageDiv.style.display = 'block';
+
+                setTimeout(() => {
+                    messageDiv.style.display = 'none';
+                }, 3000);
+            };
+
+            // Show lobby helper
+            const showLobby = () => {
+                lobby.style.display = 'block';
+                gameContainer.style.display = 'none';
+                roomInfo.style.display = 'none';
+                createRoomForm.style.display = 'none';
+                joinRoomForm.style.display = 'none';
+                messageDiv.style.display = 'none';
+                resultOverlay.style.display = 'none';
+            };
+
+            // Show game helper
+            const showGame = () => {
+                lobby.style.display = 'none';
+                gameContainer.style.display = 'block';
+            };
+
+            // Socket events
+            socket.on('roomCreated', (data) => {
+                currentRoom = data.room;
+                displayRoomId.textContent = data.room;
+                waitingMessage.style.display = 'block';
+            });
+
+            socket.on('joinSuccess', (data) => {
+                currentRoom = data.room;
+                opponentName = data.hostName;
+                joinRoomForm.style.display = 'none';
+                showMessage('Successfully joined room', 'success');
+
+                setTimeout(() => {
+                    showGame();
+                    playerSymbol = data.symbol;
+
+                    // Update player names in scoreboard
+                    if (playerSymbol === 'X') {
+                        player1Name.textContent = myName;
+                        player2Name.textContent = opponentName;
+                    } else {
+                        player1Name.textContent = opponentName;
+                        player2Name.textContent = myName;
+                    }
+
+                    initGame();
+                }, 1000);
+            });
+
+            socket.on('joinError', (data) => {
+                showMessage(data.message, 'error');
+            });
+
+            socket.on('gameStart', (data) => {
+                roomInfo.style.display = 'none';
+                showGame();
+                playerSymbol = data.symbol;
+                opponentName = data.opponentName;
+
+                // Update player names in scoreboard
+                if (playerSymbol === 'X') {
+                    player1Name.textContent = myName;
+                    player2Name.textContent = opponentName;
+                } else {
+                    player1Name.textContent = opponentName;
+                    player2Name.textContent = myName;
+                }
+
+                initGame();
+            });
+
+            socket.on('gameUpdate', (data) => {
+                gameState = data.gameState;
+                playerTurn = data.nextPlayer === playerSymbol;
+                updateStatusMessage();
+                updateUI();
+            });
+
+            socket.on('gameOver', (data) => {
+                handleGameResult(data);
+            });
+
+            socket.on('newGame', () => {
+                initGame();
+                resultOverlay.style.display = "none";
+            });
+
+            socket.on('opponentLeft', () => {
+                showMessage('Opponent left the game', 'error');
+                scores = { X: 0, O: 0 };
+                updateScoreboard();
+                setTimeout(() => {
+                    showLobby();
+                }, 2000);
+            });
+
+            socket.on('disconnect', () => {
+                showMessage('Disconnected from server', 'error');
+                setTimeout(() => {
+                    showLobby();
+                }, 2000);
+            });
+
+            // Initialize the page
+            showLobby();
+        });
+    </script>
+</body>
+
+</html>
